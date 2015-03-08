@@ -153,11 +153,15 @@ def getRoute(source_lat, source_long, dest_lat, dest_long):
     # list the nodes
     #print(route)
     # list the lat2/long  
+    steps=[]
     for i in route:
       node = data.rnodes[i]
+      steps.append ((node[0],node[1]))
       print("[%f,%f]" % (node[0],node[1]))
   else:
     print("Failed (%s)" % result) 
+
+  return steps
 
   # node1 = data.findNode(40.7416646,-74.0011315)
   # node2 = data.findNode(40.7467947,-73.98848897)
