@@ -35,6 +35,11 @@ except (ImportError, SystemError):
 
 class Router:
   def __init__(self, data):
+    data = LoadOsm("foot")
+    file_name = "lowertown.osm"
+    data.loadOsm(file_name)
+    riskFile= 'routing.csv'
+    data.readInRisk(riskFile)
     self.data = data
   def distance(self,n1,n2):
     """Calculate distance between two nodes"""
@@ -134,19 +139,14 @@ class Router:
       self.queue.append(queueItem)
 
   def getRoutes(self,source_lat,source_long,dest_lat,dest_long):
-    data = LoadOsm("foot")
-    file_name = "lowertown.osm"
-    data.loadOsm(file_name)
-    riskFile= 'routing.csv'
-    data.readInRisk(riskFile)
-    start = (40.743451, -73.988194)
-    end = (40.740916, -74.005061)
-    node1 = data.findNode(start[0],start[1])
-    node2 = data.findNode(end[0],end[1])
+    
+    start = (source_lat, source_long)
+    end = (dest_lat, dest_long)
+    node1 = self.data.findNode(start[0],start[1])
+    node2 = self.data.findNode(end[0],end[1])
     print(node1)
     print(node2)
-    router = Router(data)
-    result, route = router.doRoute(node1, node2)
+    result, route = self.doRoute(node1, node2)
     
     if result == 'success':
       # list the nodes
