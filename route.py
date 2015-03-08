@@ -142,6 +142,7 @@ def getRoute(source_lat, source_long, dest_lat, dest_long):
 
   file = "lowertown.osm"
   data = LoadOsm("foot")
+  data.loadOsm(file)
 
   # print(node1)
   # print(node2)
