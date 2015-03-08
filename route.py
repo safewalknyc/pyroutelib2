@@ -133,42 +133,31 @@ class Router:
     else:
       self.queue.append(queueItem)
 
-if __name__ == "__main__":
-  # Test suite - do a little bit of easy routing in birmingham 
-  startTime=time.time()
-  constructorTime = time.time()
-  data = LoadOsm("foot")
-  constructorElapsed = time.time()-startTime
-  print("ELAPSED TIME FOR Constructor: %f"%constructorElapsed)
-  ##PAT ADDED
-  file_name = "lowertown.osm"
-  data.loadOsm(file_name)
-  riskFile= 'routing.csv'
-  data.readInRisk(riskFile)
-  start = (40.743451,	-73.988194)
-  end = (40.740916, -74.005061)
-  elapsed = time.time()-startTime
-  print("ELAPSED TIME FOR LOADING: %f"%elapsed)
-  startTime=time.time()
-  node1 = data.findNode(start[0],start[1])
-  node2 = data.findNode(end[0],end[1])
-  print(node1)
-  print(node2)
-  elapsed = time.time()-startTime
-  print("ELAPSED TIME FOR findNode: %f"%elapsed)
-  startTime=time.time()
-  router = Router(data)
-  result, route = router.doRoute(node1, node2)
-  elapsed = time.time()-startTime
-  print("ELAPSED TIME FOR ROUTING: %f"%elapsed)
-  if result == 'success':
-    # list the nodes
-    print(route)
+  def getRoutes(self,source_lat,source_long,dest_lat,dest_long):
+    data = LoadOsm("foot")
+    file_name = "lowertown.osm"
+    data.loadOsm(file_name)
+    riskFile= 'routing.csv'
+    data.readInRisk(riskFile)
+    start = (40.743451, -73.988194)
+    end = (40.740916, -74.005061)
+    node1 = data.findNode(start[0],start[1])
+    node2 = data.findNode(end[0],end[1])
+    print(node1)
+    print(node2)
+    router = Router(data)
+    result, route = router.doRoute(node1, node2)
+    
+    if result == 'success':
+      # list the nodes
+      print(route)
 
-    # list the lat/long
-    for i in route:
-      node = data.rnodes[i]
-      print("%f,%f" % (node[0],node[1]))
-  else:
-    print("Failed (%s)" % result)
+      steps=[]
+      for i in route:
+        node = data.rnodes[i]
+        #print("%f,%f" % (node[0],node[1]))
+        steps.append(("%f,%f" % (node[0],node[1])))
+    else:
+      print("Failed (%s)" % result)
 
+    return steps 
