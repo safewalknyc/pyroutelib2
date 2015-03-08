@@ -145,8 +145,8 @@ class Router:
     source_long = float(source_long)
     dest_lat = float(dest_lat)
     dest_long = float(dest_long)
-    self.alpha= alpha
-    self.beta= beta    
+    self.alpha = float(alpha)
+    self.beta= float(beta)
  
     #print(source_lat, source_long, dest_lat, dest_long) 
     start = (source_lat, source_long)
