@@ -34,7 +34,7 @@ except (ImportError, SystemError):
   from loadOsm import *
 
 class Router:
-  def __init__(self, data):
+  def __init__(self):
     data = LoadOsm("foot")
     file_name = "lowertown.osm"
     data.loadOsm(file_name)
@@ -139,24 +139,27 @@ class Router:
       self.queue.append(queueItem)
 
   def getRoutes(self,source_lat,source_long,dest_lat,dest_long):
+    source_lat = float(source_lat)
+    source_long = float(source_long)
+    dest_lat = float(dest_lat)
+    dest_long = float(dest_long)
     
+ 
+    print(source_lat, source_long, dest_lat, dest_long) 
     start = (source_lat, source_long)
     end = (dest_lat, dest_long)
     node1 = self.data.findNode(start[0],start[1])
     node2 = self.data.findNode(end[0],end[1])
-    print(node1)
-    print(node2)
     result, route = self.doRoute(node1, node2)
     
+    steps=[]
     if result == 'success':
       # list the nodes
-      print(route)
 
-      steps=[]
       for i in route:
-        node = data.rnodes[i]
+        node = self.data.rnodes[i]
         #print("%f,%f" % (node[0],node[1]))
-        steps.append(("%f,%f" % (node[0],node[1])))
+        steps.append([node[0],node[1]])
     else:
       print("Failed (%s)" % result)
 

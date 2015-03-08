@@ -169,7 +169,6 @@ class LoadOsm:
     """Find the nearest node that can be the start of a route"""
     #self.getArea(lat,lon)
     maxDist = 1E+20
-    threshhold = .00001
     nodeFound = None
     posFound = None
     for (node_id,pos) in list(self.rnodes.items()):
@@ -180,9 +179,6 @@ class LoadOsm:
         maxDist = dist
         nodeFound = node_id
         posFound = pos
-      if(maxDist<threshhold):
-          return nodeFound
-    # print("found at %s"%str(posFound))
     return(nodeFound)
       
   def report(self):
