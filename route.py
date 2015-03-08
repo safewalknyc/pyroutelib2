@@ -26,6 +26,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------
 import sys
+from decimal import Decimal
 import math 
 try:
   from .loadOsm import *
@@ -128,13 +129,24 @@ class Router:
     else:
       self.queue.append(queueItem)
 
-if __name__ == "__main__":
-  # Test suite - do a little bit of easy routing in birmingham
+def main (argv):
+  source= argv[0].split(",")
+  dest = argv[1].split(",")
+
+  source_lat = float (source[0])
+  source_long = float (source[1])
+
+  dest_lat = float(dest[0])
+  dest_long = float(dest[1])
+
   file = "lowertown.osm"
   data = LoadOsm("foot")
 
-  node1 = data.findNode(40.7416646,-74.0011315)
-  node2 = data.findNode(40.7467947,-73.98848897)
+  # node1 = data.findNode(40.7416646,-74.0011315)
+  # node2 = data.findNode(40.7467947,-73.98848897)
+
+  node1 = data.findNode(source_lat,source_long)
+  node2 = data.findNode(dest_lat,dest_long)
 
   print(node1)
   print(node2)
@@ -150,4 +162,10 @@ if __name__ == "__main__":
       print("[%f,%f]" % (node[0],node[1]))
   else:
     print("Failed (%s)" % result)
+
+
+if __name__ == "__main__":
+   main(sys.argv[1:]) 
+
+  
 
