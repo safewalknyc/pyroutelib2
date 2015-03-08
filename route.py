@@ -132,12 +132,6 @@ class Router:
 
 def getRoute(source_lat, source_long, dest_lat, dest_long):
   
-  source_lat = float (source_lat)
-  source_long = float (source_long)
-
-  dest_lat = float(dest_lat)
-  dest_long = float(dest_long)
-
   file = "lowertown.osm"
   data = LoadOsm("foot")
   data.loadOsm(file)
