@@ -156,7 +156,7 @@ def getRoute(source_lat, source_long, dest_lat, dest_long):
     steps=[]
     for i in route:
       node = data.rnodes[i]
-      steps.append ((node[0],node[1]))
+      steps.append ("[%f,%f]" % (node[0],node[1]))
       print("[%f,%f]" % (node[0],node[1]))
   else:
     print("Failed (%s)" % result) 
