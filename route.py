@@ -131,9 +131,7 @@ class Router:
       self.queue.append(queueItem)
 
 def getRoute(source_lat, source_long, dest_lat, dest_long):
-  node1 = data.findNode(source_lat,source_long)
-  node2 = data.findNode(dest_lat,dest_long)
-
+  
   source_lat = float (source_lat)
   source_long = float (source_long)
 
@@ -142,7 +140,10 @@ def getRoute(source_lat, source_long, dest_lat, dest_long):
 
   file = "lowertown.osm"
   data = LoadOsm("foot")
+  data.loadOsm(file)
 
+  node1 = data.findNode(source_lat,source_long)
+  node2 = data.findNode(dest_lat,dest_long)
   # print(node1)
   # print(node2)
 
