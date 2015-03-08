@@ -23,14 +23,15 @@
 #  2007-11-05  OJW  Multiple forms of transport
 #------------------------------------------------------
 import os
+import json
 import re
 import sys
 import osmapi
-
-# from pyroutelib2 import (tiledata, tilenames, weights)
+import time
 import tiledata
 import tilenames
 import weights
+import json
 
 class LoadOsm:
   """Parse an OSM file looking for routing information, and do routing with it"""
@@ -42,10 +43,11 @@ class LoadOsm:
     self.tiles = {}
     self.weights = weights.RoutingWeights()
     self.api = osmapi.OsmApi(api="api.openstreetmap.org")
-
+  
   def getArea(self, lat, lon):
     """Download data in the vicinity of a lat/long.
     Return filename to existing or newly downloaded .osm file."""
+    
     z = tiledata.DownloadLevel()
     (x,y) = tilenames.tileXY(lat, lon, z)
 
@@ -54,7 +56,7 @@ class LoadOsm:
       #print "Already got %s" % tileID
       return
     self.tiles[tileID] = True
-
+    
     filename = tiledata.GetOsmTileData(z,x,y)
     #print "Loading %d,%d at z%d from %s" % (x,y,z,filename)
     return(self.loadOsm(filename))
@@ -66,14 +68,7 @@ class LoadOsm:
 
     nodes, ways = {}, {}
 
-    with open(filename, "r", encoding='utf8') as fp:
-      osm_xml = fp.read()
-    if len(osm_xml.strip()) < 1:
-      print("No data read from {}".format(filename))
-      return(False)
-
-    data = self.api.ParseOsm(osm_xml)
-    # data = [{ type: node|way|relation, data: {}},...]
+    data = [json.loads(el) for el in open('jsonTokens.txt','r').readlines()][0]
 
     for x in data:
       try:
@@ -86,7 +81,8 @@ class LoadOsm:
       except KeyError:
         # Don't care about bad data (no type/data key)
         continue
-    #end for x in data
+   
+   
     for way_id, way_data in ways.items():
       way_nodes = []
       for nd in way_data['nd']:
@@ -96,7 +92,7 @@ class LoadOsm:
       self.storeWay(way_id, way_data['tag'], way_nodes)
 
     return(True)
-
+  
   def storeWay(self, wayID, tags, nodes):
     highway = self.equivalent(tags.get('highway', ''))
     railway = self.equivalent(tags.get('railway', ''))
@@ -132,7 +128,7 @@ class LoadOsm:
 
   def makeNodeRouteable(self,node):
     self.rnodes[node[0]] = [node[1],node[2]]
-
+    
   def addLink(self,fr,to, weight=1):
     """Add a routeable edge to the scenario"""
     try:
@@ -168,37 +164,67 @@ class LoadOsm:
       return(equivalent[tag])
     except KeyError:
       return(tag)
-
+    
   def findNode(self,lat,lon):
     """Find the nearest node that can be the start of a route"""
-    self.getArea(lat,lon)
+    #self.getArea(lat,lon)
     maxDist = 1E+20
+    threshhold = .00001
     nodeFound = None
     posFound = None
-    print ("NUMNODES" + str(len(self.rnodes.items())))
     for (node_id,pos) in list(self.rnodes.items()):
       dy = pos[0] - lat
       dx = pos[1] - lon
       dist = dx * dx + dy * dy
       if(dist < maxDist):
         maxDist = dist
-        if (maxDist <= 1e-04):
-          break
         nodeFound = node_id
         posFound = pos
-
-    print ("MIN: " + str(maxDist))
+      if(maxDist<threshhold):
+          return nodeFound
     # print("found at %s"%str(posFound))
     return(nodeFound)
-
+      
   def report(self):
     """Display some info about the loaded data"""
     print("Loaded %d nodes" % len(list(self.rnodes.keys())))
     print("Loaded %d %s routes" % (len(list(self.routing.keys())), self.transport))
+  def readInRisk(self,file):
+        crimeData={}
+        with open(file, 'r') as f:
+                for line in f:
+                    splitLine = line.split(',')
+                    parentNode = int(splitLine[0])
+                    childNode = int(splitLine[1])
+                    if parentNode in crimeData:
+                        childDict = crimeData[parentNode]
+                        childDict[childNode] = [float(splitLine[-2]),float(splitLine[-1])]
+                        crimeData[parentNode] =  childDict
+                    else:
+                        childDict = {}
+                        childDict[childNode] = [float(splitLine[-2]),float(splitLine[-1])]
+                        crimeData[parentNode] =  childDict
+        self.routing=crimeData
+                        
 
+
+def routeToCSV(routes,nodes):
+    outputFileName = 'C:/Users/Patrick/Columbia/Hackathon/PyrouteLib/pyroutelib2-master/routing.csv'
+    outputFile = open(outputFileName,'w')
+    for key in routes.keys():
+        base_node = nodes[key]
+        base_lat = base_node[0]
+        base_lng = base_node[1]
+        for child in routes[key].keys():
+            child_node = nodes[child]
+            out = "{base_node},{child_node},{base_lat},{base_lng},{child_lat},{child_lng}\n".format(base_node=key,child_node=child, base_lat=base_lat, base_lng=base_lng,child_lat=child_node[0],child_lng=child_node[1])
+            outputFile.write(out)
+    outputFile.close()
+        
 # Parse the supplied OSM file
-if __name__ == "__main__":
-  file = "lowertown.osm"
-  data = LoadOsm("foot")
-  #data.loadOsm(file)
-  data.report()
+#if __name__ == "__main__":
+#    file = "lowertown.osm"
+#    data = LoadOsm("foot")
+#    data.loadOsm(file)
+#    data.report()
+#    

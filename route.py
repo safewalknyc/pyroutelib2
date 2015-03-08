@@ -25,8 +25,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------
+import time
 import sys
-from decimal import Decimal
 import math 
 try:
   from .loadOsm import *
@@ -34,9 +34,7 @@ except (ImportError, SystemError):
   from loadOsm import *
 
 class Router:
-  def __init__(self):
-    data = LoadOsm("foot")
-    data.loadOsm('lowertown.osm')
+  def __init__(self, data):
     self.data = data
   def distance(self,n1,n2):
     """Calculate distance between two nodes"""
@@ -47,7 +45,8 @@ class Router:
     # TODO: projection issues
     dlat = lat2 - lat1
     dlon = lon2 - lon1
-    dist = math.hypot(dlat, dlon)
+    dist2 = dlat * dlat + dlon * dlon
+    dist = math.sqrt(dist2)
     return(dist)
   
   def doRoute(self,start,end):
@@ -58,7 +57,7 @@ class Router:
     
     # Start by queueing all outbound links from the start node
     blankQueueItem = {'end':-1,'distance':0,'nodes':str(start)}
-
+    print("Starting Node: " + str(start))
     try:
       for i, weight in self.data.routing[start].items():
         self.addToQueue(start,i, blankQueueItem, weight)
@@ -101,18 +100,21 @@ class Router:
     # TODO: we could reduce downloads even more by only getting data around
     # the tip of the route, rather than around all nodes linked from the tip
     end_pos = self.data.rnodes[end]
-    self.data.getArea(end_pos[0], end_pos[1])
+    #self.data.getArea(end_pos[0], end_pos[1])
     
     # If already in queue, ignore
     for test in self.queue:
       if test['end'] == end:
         return
-    distance = self.distance(start, end)
     if(weight == 0):
       return
-
-    distance = distance / weight
-    
+    ##Weight will be "risk-value" precalculated by kernel clutsering and will be factors in
+      #by (alpha*distance+beta*weight)^.5
+     ##Distance precalculated on each edge and risk too
+    alpha=1
+    beta=.1
+    #distance = alpha*self.distance(start,end)+beta*self.data.routing[start][end][1]
+    distance = alpha*math.exp(self.data.routing[start][end][0])+beta*math.exp(self.data.routing[start][end][1])
     # Create a hash for all the route's attributes
     distanceSoFar = queueSoFar['distance']
     queueItem = { \
@@ -131,69 +133,42 @@ class Router:
     else:
       self.queue.append(queueItem)
 
-  def getRoute(self,source_lat, source_long, dest_lat, dest_long):
-    
-    source_lat = float (source_lat)
-    source_long = float (source_long)
-
-    dest_lat = float(dest_lat)
-    dest_long = float(dest_long)
-
-    node1 = self.data.findNode(source_lat,source_long)
-    node2 = self.data.findNode(dest_lat,dest_long)
-    print(node1)
-    print(node2)
-
-    result= ''
-    #result= router.dijsktra(node1,node2)
-    result, route = self.doRoute(node1, node2)
-    steps =[]
-    if result == 'success':
-      # list the nodes
-      #print(route)
-      # list the lat2/long  
-      steps=[]
-      for i in route:
-        node = self.data.rnodes[i]
-        steps.append ("[%f,%f]" % (node[0],node[1]))
-        print("[%f,%f]" % (node[0],node[1]))
-    else:
-      print("Failed (%s)" % result) 
-    return steps
-
-def dijsktra(self, start,end):
-  visited = {initial: 0}
-  path = {}
-  nodes = set(self.data.routing[start].items())
-  print (nodes)
- 
-  while nodes: 
-    min_node = None
-    for node in nodes:
-      if node in visited:
-        if min_node is None:
-          min_node = node
-        elif visited[node] < visited[min_node]:
-          min_node = node
- 
-    if min_node is None:
-      break
- 
-    nodes.remove(min_node)
-    current_weight = visited[min_node]
- 
-    # for edge in graph.edges[min_node]:
-    #   weight = current_weight + graph.distance[(min_node, edge)]
-    #   if edge not in visited or weight < visited[edge]:
-    #     visited[edge] = weight
-    #     path[edge] = min_node
-  return path
-
-  # node1 = data.findNode(40.7416646,-74.0011315)
-  # node2 = data.findNode(40.7467947,-73.98848897)
-
-
 if __name__ == "__main__":
-  router = Router()
-  router.getRoute("40.7416643","-74.0011315","40.7467947","-73.98848897")
+  # Test suite - do a little bit of easy routing in birmingham 
+  startTime=time.time()
+  constructorTime = time.time()
+  data = LoadOsm("foot")
+  constructorElapsed = time.time()-startTime
+  print("ELAPSED TIME FOR Constructor: %f"%constructorElapsed)
+  ##PAT ADDED
+  file_name = "lowertown.osm"
+  data.loadOsm(file_name)
+  riskFile= 'routing.csv'
+  data.readInRisk(riskFile)
+  start = (40.743451,	-73.988194)
+  end = (40.740916, -74.005061)
+  elapsed = time.time()-startTime
+  print("ELAPSED TIME FOR LOADING: %f"%elapsed)
+  startTime=time.time()
+  node1 = data.findNode(start[0],start[1])
+  node2 = data.findNode(end[0],end[1])
+  print(node1)
+  print(node2)
+  elapsed = time.time()-startTime
+  print("ELAPSED TIME FOR findNode: %f"%elapsed)
+  startTime=time.time()
+  router = Router(data)
+  result, route = router.doRoute(node1, node2)
+  elapsed = time.time()-startTime
+  print("ELAPSED TIME FOR ROUTING: %f"%elapsed)
+  if result == 'success':
+    # list the nodes
+    print(route)
+
+    # list the lat/long
+    for i in route:
+      node = data.rnodes[i]
+      print("%f,%f" % (node[0],node[1]))
+  else:
+    print("Failed (%s)" % result)
 
