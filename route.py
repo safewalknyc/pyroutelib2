@@ -162,8 +162,6 @@ def getRoute(source_lat, source_long, dest_lat, dest_long):
   # node2 = data.findNode(40.7467947,-73.98848897)
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
    #main(sys.argv[1:]) 
-
-  
 
