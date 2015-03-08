@@ -41,6 +41,8 @@ class Router:
     riskFile= 'routing.csv'
     data.readInRisk(riskFile)
     self.data = data
+    self.alpha=1
+    self.beta=.1
   def distance(self,n1,n2):
     """Calculate distance between two nodes"""
     lat1 = self.data.rnodes[n1][0]
@@ -119,7 +121,7 @@ class Router:
     alpha=1
     beta=.1
     #distance = alpha*self.distance(start,end)+beta*self.data.routing[start][end][1]
-    distance = alpha*math.exp(self.data.routing[start][end][0])+beta*math.exp(self.data.routing[start][end][1])
+    distance = self.alpha*math.exp(self.data.routing[start][end][0])+self.beta*math.exp(self.data.routing[start][end][1])
     # Create a hash for all the route's attributes
     distanceSoFar = queueSoFar['distance']
     queueItem = { \
@@ -138,14 +140,15 @@ class Router:
     else:
       self.queue.append(queueItem)
 
-  def getRoutes(self,source_lat,source_long,dest_lat,dest_long):
+  def getRoutes(self,source_lat,source_long,dest_lat,dest_long, alpha, beta):
     source_lat = float(source_lat)
     source_long = float(source_long)
     dest_lat = float(dest_lat)
     dest_long = float(dest_long)
-    
+    self.alpha= alpha
+    self.beta= beta    
  
-    print(source_lat, source_long, dest_lat, dest_long) 
+    #print(source_lat, source_long, dest_lat, dest_long) 
     start = (source_lat, source_long)
     end = (dest_lat, dest_long)
     node1 = self.data.findNode(start[0],start[1])
