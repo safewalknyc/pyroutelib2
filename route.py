@@ -34,7 +34,9 @@ except (ImportError, SystemError):
   from loadOsm import *
 
 class Router:
-  def __init__(self, data):
+  def __init__(self):
+    data = LoadOsm("foot")
+    data.loadOsm('lowertown.osm')
     self.data = data
   def distance(self,n1,n2):
     """Calculate distance between two nodes"""
@@ -45,8 +47,7 @@ class Router:
     # TODO: projection issues
     dlat = lat2 - lat1
     dlon = lon2 - lon1
-    dist2 = dlat * dlat + dlon * dlon
-    dist = math.sqrt(dist2)
+    dist = math.hypot(dlat, dlon)
     return(dist)
   
   def doRoute(self,start,end):
@@ -130,43 +131,74 @@ class Router:
     else:
       self.queue.append(queueItem)
 
-def getRoute(source_lat, source_long, dest_lat, dest_long):
-  
-  source_lat = float (source_lat)
-  source_long = float (source_long)
+  def getRoute(self,source_lat, source_long, dest_lat, dest_long):
+    
+    source_lat = float (source_lat)
+    source_long = float (source_long)
 
-  dest_lat = float(dest_lat)
-  dest_long = float(dest_long)
+    dest_lat = float(dest_lat)
+    dest_long = float(dest_long)
 
-  file = "lowertown.osm"
-  data = LoadOsm("foot")
-  data.loadOsm(file)
+    file_name = "lowertown.osm"
+    print ("LOADINGOSM")
+   
+    print ("LOADEDOSM")
 
-  node1 = data.findNode(source_lat,source_long)
-  node2 = data.findNode(dest_lat,dest_long)
-  # print(node1)
-  # print(node2)
+    node1 = self.data.findNode(source_lat,source_long)
+    node2 = self.data.findNode(dest_lat,dest_long)
+    print(node1)
+    print(node2)
 
-  router = Router(data)
-  result, route = router.doRoute(node1, node2)
-  if result == 'success':
-    # list the nodes
-    #print(route)
-    # list the lat2/long  
-    steps=[]
-    for i in route:
-      node = data.rnodes[i]
-      steps.append ("[%f,%f]" % (node[0],node[1]))
-      print("[%f,%f]" % (node[0],node[1]))
-  else:
-    print("Failed (%s)" % result) 
+    result= ''
+    #result= router.dijsktra(node1,node2)
+    result, route = self.doRoute(node1, node2)
+    steps =[]
+    if result == 'success':
+      # list the nodes
+      #print(route)
+      # list the lat2/long  
+      steps=[]
+      for i in route:
+        node = self.data.rnodes[i]
+        steps.append ("[%f,%f]" % (node[0],node[1]))
+        print("[%f,%f]" % (node[0],node[1]))
+    else:
+      print("Failed (%s)" % result) 
+    return steps
 
-  return steps
+def dijsktra(self, start,end):
+  visited = {initial: 0}
+  path = {}
+  nodes = set(self.data.routing[start].items())
+  print (nodes)
+ 
+  while nodes: 
+    min_node = None
+    for node in nodes:
+      if node in visited:
+        if min_node is None:
+          min_node = node
+        elif visited[node] < visited[min_node]:
+          min_node = node
+ 
+    if min_node is None:
+      break
+ 
+    nodes.remove(min_node)
+    current_weight = visited[min_node]
+ 
+    # for edge in graph.edges[min_node]:
+    #   weight = current_weight + graph.distance[(min_node, edge)]
+    #   if edge not in visited or weight < visited[edge]:
+    #     visited[edge] = weight
+    #     path[edge] = min_node
+  return path
 
   # node1 = data.findNode(40.7416646,-74.0011315)
   # node2 = data.findNode(40.7467947,-73.98848897)
 
 
-# if __name__ == "__main__":
-   #main(sys.argv[1:]) 
+if __name__ == "__main__":
+  router = Router()
+  router.getRoute("40.7416643","-74.0011315","40.7467947","-73.98848897")
 

@@ -46,7 +46,6 @@ class LoadOsm:
   def getArea(self, lat, lon):
     """Download data in the vicinity of a lat/long.
     Return filename to existing or newly downloaded .osm file."""
-
     z = tiledata.DownloadLevel()
     (x,y) = tilenames.tileXY(lat, lon, z)
 
@@ -176,14 +175,19 @@ class LoadOsm:
     maxDist = 1E+20
     nodeFound = None
     posFound = None
+    print ("NUMNODES" + str(len(self.rnodes.items())))
     for (node_id,pos) in list(self.rnodes.items()):
       dy = pos[0] - lat
       dx = pos[1] - lon
       dist = dx * dx + dy * dy
       if(dist < maxDist):
         maxDist = dist
+        if (maxDist <= 1e-04):
+          break
         nodeFound = node_id
         posFound = pos
+
+    print ("MIN: " + str(maxDist))
     # print("found at %s"%str(posFound))
     return(nodeFound)
 
@@ -196,5 +200,5 @@ class LoadOsm:
 if __name__ == "__main__":
   file = "lowertown.osm"
   data = LoadOsm("foot")
-  data.loadOsm(file)
+  #data.loadOsm(file)
   data.report()
