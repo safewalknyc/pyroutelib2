@@ -52,6 +52,7 @@ def GetOsmTileData(z,x,y):
 
      
     if(not os.path.exists(filename)): # TODO: allow expiry of old data
+      print ("Got here")
       urlretrieve(URL, filename)
     return(filename)
     

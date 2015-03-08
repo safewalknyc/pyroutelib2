@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<osm version="0.6" generator="CGImap 0.3.3 (13294 thorn-01.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+<osm version="0.6" generator="CGImap 0.3.3 (29812 thorn-03.openstreetmap.org)" copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
  <bounds minlat="40.7306085" minlon="-74.0039062" maxlat="40.7389332" maxlon="-73.9929199"/>
  <node id="42428458" visible="true" version="7" changeset="19072644" timestamp="2013-11-23T14:43:04Z" user="lxbarth_nycbuildings" uid="1764427" lat="40.7278217" lon="-73.9947585">
   <tag k="highway" v="traffic_signals"/>
