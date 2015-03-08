@@ -109,6 +109,7 @@ class Router:
     distance = self.distance(start, end)
     if(weight == 0):
       return
+
     distance = distance / weight
     
     # Create a hash for all the route's attributes
@@ -129,27 +130,21 @@ class Router:
     else:
       self.queue.append(queueItem)
 
-def main (argv):
-  source= argv[0].split(",")
-  dest = argv[1].split(",")
+def getRoute(source_lat, source_long, dest_lat, dest_long):
+  node1 = data.findNode(source_lat,source_long)
+  node2 = data.findNode(dest_lat,dest_long)
 
-  source_lat = float (source[0])
-  source_long = float (source[1])
+  source_lat = float (source_lat)
+  source_long = float (source_long)
 
-  dest_lat = float(dest[0])
-  dest_long = float(dest[1])
+  dest_lat = float(dest_lat)
+  dest_long = float(dest_long)
 
   file = "lowertown.osm"
   data = LoadOsm("foot")
 
-  # node1 = data.findNode(40.7416646,-74.0011315)
-  # node2 = data.findNode(40.7467947,-73.98848897)
-
-  node1 = data.findNode(source_lat,source_long)
-  node2 = data.findNode(dest_lat,dest_long)
-
-  print(node1)
-  print(node2)
+  # print(node1)
+  # print(node2)
 
   router = Router(data)
   result, route = router.doRoute(node1, node2)
@@ -161,11 +156,14 @@ def main (argv):
       node = data.rnodes[i]
       print("[%f,%f]" % (node[0],node[1]))
   else:
-    print("Failed (%s)" % result)
+    print("Failed (%s)" % result) 
+
+  # node1 = data.findNode(40.7416646,-74.0011315)
+  # node2 = data.findNode(40.7467947,-73.98848897)
 
 
 if __name__ == "__main__":
-   main(sys.argv[1:]) 
+   #main(sys.argv[1:]) 
 
   
 
